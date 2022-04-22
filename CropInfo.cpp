@@ -7,12 +7,10 @@ using namespace std;
 Clear all the values to zero.
 */
 CropInfo::CropInfo(){
-  name = new char [MAX_NAME_LEN];  
+  name = nullptr;  
   yieldsByYear = new double [NUM_YEARS];
   cropCode = 0;
-    for (int index = 0; index < MAX_NAME_LEN; index++) {
-        name[index] = '\0';
-    }
+  
     for (int index = 0; index < NUM_YEARS; index++) {
         yieldsByYear[index] = 0;
     }
@@ -24,27 +22,31 @@ CropInfo::~CropInfo(){
 }
 
 void CropInfo::operator=(const CropInfo &other){
-  
+
   for (int index = 0; index < NUM_YEARS; index++) {
         yieldsByYear[index] = other.yieldsByYear[index];
     }
   
-  strcpy(name, other.name);
-  cropCode = other.cropCode;
+    delete [] name;
+  
+    name = createCharPtr(other.name);
+    cropCode = other.cropCode;
   
 }
 
 CropInfo::CropInfo(const CropInfo &other){
-  name = new char [MAX_NAME_LEN];  
+  name = nullptr;  
   yieldsByYear = new double [NUM_YEARS];
   cropCode = 0;
 
   for (int index = 0; index < NUM_YEARS; index++) {
         yieldsByYear[index] = other.yieldsByYear[index];
     }
+    
+    delete [] name;
   
-  strcpy(name, other.name);
-  cropCode = other.cropCode;
+    name = createCharPtr(other.name);
+    cropCode = other.cropCode;
 }
 /**
 Loads the information from the file specified
@@ -52,7 +54,8 @@ Loads the information from the file specified
 void CropInfo::readFromFile(istream &file) {
     file >> cropCode;
     file.ignore(100, ';');
-    file.getline(name, MAX_NAME_LEN, ';');
+    delete [] name;
+    name = readCString(file, ';');
     for (int index = 0; index < NUM_YEARS; index++) {
         file >> yieldsByYear[index];
         // Either ignore the ; or \n after each year.
@@ -69,7 +72,8 @@ void CropInfo::readFromUser(){
     cropCode = readDouble("Enter the crop code: ");
     cin.ignore(100, '\n');
     cout << "Enter the crop name: ";
-    cin.getline(name, MAX_NAME_LEN);
+    delete [] name;
+    
     for (int index = 0; index < NUM_YEARS; index++) {
         // Create the prompt here, no prompt sent to readDouble.
         cout << "Enter the yield for the year " <<  START_YEAR + index << ": ";
